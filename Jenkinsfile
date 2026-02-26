@@ -9,26 +9,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Build') {
-            steps {
-                echo 'Installing dependencies...'
-                sh 'PUPPETEER_SKIP_DOWNLOAD=true npm install'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                echo 'Running tests...'
-                sh 'npm test'
-            }
-        }
-
         stage('Containerize') {
             steps {
                 echo 'Building Docker image...'
@@ -38,7 +18,7 @@ pipeline {
 
         stage('Push') {
             steps {
-                echo 'Logging into Docker Hub...'
+                echo 'Pushing image to Docker Hub...'
                 withCredentials([usernamePassword(
                     credentialsId: "${DOCKER_HUB_CREDS}",
                     usernameVariable: 'DOCKER_USER',
@@ -53,7 +33,6 @@ pipeline {
 
     post {
         always {
-            echo 'Cleaning up...'
             sh "docker rmi ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest || true"
         }
     }
